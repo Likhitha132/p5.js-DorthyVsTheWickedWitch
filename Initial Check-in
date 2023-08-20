@@ -1,0 +1,212 @@
+//Move the catcher with the left and right arrow keys to catch the falling objects. 
+
+/* VARIABLES */
+let catcher, fallingObject;
+let catcherImg, fallingObjectImg;
+let score = 0;
+let enterButton;
+let instructionButton;
+let screen = 0; 
+let numberOfKeys;
+let timer = 30;
+
+/* PRELOAD LOADS FILES */
+function preload(){
+  catcherImg = loadImage("assets/Dorothy.png");
+  fallingObjectImg = loadImage("assets/Key.png");
+}
+
+/* SETUP RUNS ONCE */
+function setup() {
+  createCanvas(400,400);
+  background(153, 0, 204);
+  noStroke();
+  fill(102, 0, 102);
+  rect(0,0,400,25);
+  rect(0,0,25,400);
+  rect(0,375,400,25);
+  rect(375,0,25,400);
+
+  catcherImg.resize(60,0);
+  fallingObjectImg.resize(30,0);
+
+  showScreen0();
+}
+
+/* DRAW LOOP REPEATS */
+function draw() { 
+  if (instructionButton.mouse.presses()) {
+    screen = 1
+    showScreen1();
+  }
+  
+  if (enterButton.mouse.presses()) {
+    screen = 2; 
+    showScreen2(); 
+  }
+  
+  if (screen == 2) {
+    //move catcher onto screen
+    //background(153,0,204);
+
+    if (kb.pressing("left")) {
+      background(153,0,204);
+      textSize(20);
+      text("Score = " + score, 50, 30);
+      text("Timer: " + timer, 50, 50);
+      catcher.vel.x = -5;
+    } else if (kb.pressing("right")) {
+      background(153,0,204);
+      textSize(20);
+      text("Score = " + score, 50, 30);
+      text("Timer: " + timer, 50, 50);
+      catcher.vel.x = 5;
+    } else {
+      catcher.vel.x = 0;
+    }
+
+    if (catcher.x < 50) {
+      catcher.x = 50;
+    } else if (catcher.x > 350) {
+      catcher.x = 350;
+    }
+
+    if (screen == 2){
+      background(153,0,204);
+      textSize(20);
+      text("Score = " + score, 50, 30);
+      text("Timer: " + timer, 50, 50);
+      if (timer == 30){
+        fallingObject.y = 0;
+        fallingObject.x = random(width);      
+        fallingObject.vel.y = random(3,6);
+        fallingObject.direction = "down";
+      } 
+      
+      if (fallingObject.collides (catcher)) {
+        fallingObject.y = 0;
+        fallingObject.x = random(width);
+        fallingObject.vel.y = random(3,6);
+        fallingObject.direction = "down";
+        score = score + 1;
+      }
+      
+      if (fallingObject.y >= height) {
+        fallingObject.y = 0;
+        fallingObject.x = random(width);
+        fallingObject.vel.y = random(3,6);
+        score = 0
+      }
+    }
+    
+    if (frameCount % 60 == 0 && timer > 0){
+      timer--;
+      background(153,0,204);
+      textSize(20);
+      text("Score = " + score, 50, 30);
+      text("Timer: " + timer, 50, 50);
+    }
+    
+    if (timer == 0) {
+      //Medium - If score is less then zero, you lose
+      if (score <= numberOfKeys) {
+        background(255,80,80);
+        
+        //Draw sprites off of screen
+        catcher.pos = { x: 600, y: -300 };
+        fallingObject.pos = { x: -100, y: 0 };
+        
+        //Draw end of game text
+        textSize(20);
+        fill(0);
+        text("You lose!\nYou did not collect enough keys for \nDorothy to escape the wicked witch. \nNow she is stuck there forever!", width/2, height/2 - 65); 
+        textSize(18);
+        text("You needed to collect " + numberOfKeys + " keys to escape, \nbut you only collected " + score + ".", width/2, height/2 +45);
+        textSize(16);
+      } 
+
+      if (score >= numberOfKeys) {
+        background("palegreen");
+        catcher.pos = { x: 600, y: -300 };
+        fallingObject.pos = { x: -100, y: 0 };
+        textSize(20);
+        fill(0);
+        text("You win!", width/2, height/2 - 40); 
+        textSize(18);
+        text("You collected enough keys, so Dorothy \nsuccessfully escaped from the wicked witch!", width/2, height/2 -10);
+        text("You needed to collect " + numberOfKeys + " keys to escape, \nbut you collected " + score + "!", width/2, height/2 +50);
+      }
+    }
+  }
+}
+
+function showScreen0() {
+    textAlign(CENTER);
+    textSize(20);
+    fill("white");
+    text("Dorothy vs. the Wicked Witch!", width/2, height/2 -125);
+    textSize(16);
+    text("The wicked witch has Dorothy stuck in a room \nwith many locks. However, the Scarecrow, Tin \nWoodman, and Cowardly Lion come to help her \nby tossing keys from a hole in the ceiling. Help \nDorothy escape from the wicked witch by \ncollecting enough keys!", width / 2, height / 2 -70);
+    //creating enter screen
+    enterButton = new Sprite(width / 2, height / 2 + 100);
+    instructionButton = new Sprite (width/2, height/2 +100);
+
+
+    enterButton.w = 100;
+    enterButton.h = 50;
+    enterButton.collider = "k";
+    enterButton.text = "Begin";
+    enterButton.color = "orange";
+  
+    instructionButton.w = 100;
+    instructionButton.h = 50;
+    instructionButton.collider = "k";
+    instructionButton.text = "Instructions";
+    instructionButton.color = "orange";
+  }
+  
+function showScreen1() {
+  enterButton.pos = {x:200, y: 300};
+  instructionButton.pos = {x: -150, y: 150};
+  createCanvas(400,400);
+  background(153, 0, 204);
+  textAlign(CENTER);
+  fill("white");
+  textSize(20);
+  text("Instructions:", width/2, height/2 -150);
+  textSize(17);
+  textAlign(LEFT);
+  text("- You have 30 seconds to collect as many \nkeys as you can. \n- Remember, you do not know how many \nlocks there are, so collect as many keys \nas possible. \n- Move Dorothy with the left and right \narrow keys to catch the falling objects.\n- If you miss even one key, the score \nresets to 0.", 45, height/2 -110);
+  noStroke();
+  fill(102, 0, 102);
+  rect(0,0,400,25);
+  rect(0,0,25,400);
+  rect(0,375,400,25);
+  rect(375,0,25,400);
+
+}
+  
+function showScreen2() {
+    background(153, 0, 204);
+    // Move extra buttons off screen
+    enterButton.pos = { x: -100, y: -100 }; 
+  
+    //Create catcher and fallingobject
+    catcher = new Sprite(catcherImg,200,320,100,20,"k");
+    catcher.color = color(95,158,160);
+    
+    fallingObject = new Sprite(fallingObjectImg,100,0,10);
+    fallingObject.color = color(0,128,128); 
+
+    catcher.pos = {x:200, y:380};
+    fallingObject.pos = {x:100, y:0};
+
+    //Draw score on screen
+    fill(255,255,255);
+    textSize(20);
+    textAlign(CENTER);
+    text("Score = " + score, 50, 30);
+
+    numberOfKeys = Math.round(random(5,20));
+    print (numberOfKeys); 
+}
